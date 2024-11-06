@@ -161,7 +161,7 @@ impl<C: ScalableCollider> Plugin for ColliderBackendPlugin<C> {
                     //         so `C::Context` is unable to borrow this resource.
                     //         This does not perform any structural world changes,
                     //         so reading mutably through a read-only cell is OK.
-                    //         (We can't get a non-readonly cell from a DeferredWorld)
+                    //         (We can't get a non-readonly cell from a `DeferredWorld`)
                     unsafe { cell.get_resource_mut::<ContextState<C>>() }
                 }
                 .unwrap_or_else(|| {
