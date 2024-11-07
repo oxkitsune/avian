@@ -89,17 +89,11 @@ impl<C: ScalableCollider> Default for ColliderBackendPlugin<C> {
 
 impl<C: ScalableCollider> Plugin for ColliderBackendPlugin<C> {
     fn build(&self, app: &mut App) {
-        #[derive(Resource)]
-        struct ContextState<C: ScalableCollider>(SystemState<C::Context>);
-
         // Register the one-shot system that is run for all removed colliders.
         if !app.world().contains_resource::<ColliderRemovalSystem>() {
             let collider_removed_id = app.world_mut().register_system(collider_removed);
             app.insert_resource(ColliderRemovalSystem(collider_removed_id));
         }
-
-        let context_state = SystemState::new(app.world_mut());
-        app.insert_resource(ContextState::<C>(context_state));
 
         let hooks = app.world_mut().register_component_hooks::<C>();
 
