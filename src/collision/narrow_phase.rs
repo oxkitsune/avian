@@ -545,8 +545,8 @@ impl<'w, 's, C: AnyCollider> NarrowPhase<'w, 's, C> {
             *collider2.rotation,
             collider1.entity,
             collider2.entity,
-            &self.context,
             max_distance,
+            &self.context,
         );
 
         // Get the previous contacts if there are any.

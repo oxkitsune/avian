@@ -1,7 +1,7 @@
 //! An example demonstrating how to make a custom collider and use it for collision detection.
 
 use avian2d::{math::*, prelude::*};
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{ecs::system::SystemParamItem, prelude::*, sprite::MaterialMesh2dBundle};
 use examples_common_2d::ExampleCommonPlugin;
 
 fn main() {
@@ -53,13 +53,7 @@ impl CircleCollider {
 impl AnyCollider for CircleCollider {
     type Context = ();
 
-    fn aabb(
-        &self,
-        position: Vector,
-        _rotation: impl Into<Rotation>,
-        _entity: Entity,
-        _context: &Self::Context,
-    ) -> ColliderAabb {
+    fn aabb(&self, position: Vector, _rotation: impl Into<Rotation>) -> ColliderAabb {
         ColliderAabb::new(position, Vector::splat(self.radius))
     }
 
@@ -88,6 +82,7 @@ impl AnyCollider for CircleCollider {
         position2: Vector,
         rotation2: impl Into<Rotation>,
         prediction_distance: Scalar,
+        _context: &SystemParamItem<'_, '_, Self::Context>,
     ) -> Vec<ContactManifold> {
         let rotation1: Rotation = rotation1.into();
         let rotation2: Rotation = rotation2.into();

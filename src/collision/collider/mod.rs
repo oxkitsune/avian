@@ -4,7 +4,7 @@ use crate::prelude::*;
 use bevy::{
     ecs::{
         entity::{EntityMapper, MapEntities},
-        system::{ReadOnlySystemParam, SystemParam},
+        system::{ReadOnlySystemParam, SystemParamItem},
     },
     prelude::*,
     utils::HashSet,
@@ -61,7 +61,7 @@ pub trait AnyCollider: Component {
     /// use avian3d::prelude::*;
     /// use avian3d::math::{Vector, Scalar};
     /// use bevy::prelude::*;
-    /// use bevy::ecs::system::SystemParam;
+    /// use bevy::ecs::system::SystemParamItem;
     ///
     /// #[derive(Component)]
     /// pub struct VoxelData {
@@ -83,8 +83,6 @@ pub trait AnyCollider: Component {
     /// #       &self,
     /// #       _: Vector,
     /// #       _: impl Into<Rotation>,
-    /// #       _: Entity,
-    /// #       _: &<Self::Context as SystemParam>::Item<'_, '_>,
     /// #   ) -> ColliderAabb { unimplemented!() }
     /// #   fn mass_properties(&self, _: Scalar) -> ColliderMassProperties { unimplemented!() }
     ///     fn contact_manifolds(
@@ -96,8 +94,8 @@ pub trait AnyCollider: Component {
     ///         rotation2: impl Into<Rotation>,
     ///         entity1: Entity,
     ///         entity2: Entity,
-    ///         (voxel_data, time): &<Self::Context as SystemParam>::Item<'_, '_>,
     ///         prediction_distance: Scalar,
+    ///         (voxel_data, time): &SystemParamItem<'_, '_, Self::Context>,
     ///     ) -> Vec<ContactManifold> {
     ///         let [voxels1, voxels2] = voxel_data.get_many([entity1, entity2])
     ///             .expect("our own `VoxelCollider` entities should have `VoxelData`");
@@ -115,13 +113,7 @@ pub trait AnyCollider: Component {
         feature = "2d",
         doc = "\n\nThe rotation is counterclockwise and in radians."
     )]
-    fn aabb(
-        &self,
-        position: Vector,
-        rotation: impl Into<Rotation>,
-        entity: Entity,
-        context: &<Self::Context as SystemParam>::Item<'_, '_>,
-    ) -> ColliderAabb;
+    fn aabb(&self, position: Vector, rotation: impl Into<Rotation>) -> ColliderAabb;
 
     /// Computes the swept [Axis-Aligned Bounding Box](ColliderAabb) of the collider.
     /// This corresponds to the space the shape would occupy if it moved from the given
@@ -136,11 +128,9 @@ pub trait AnyCollider: Component {
         start_rotation: impl Into<Rotation>,
         end_position: Vector,
         end_rotation: impl Into<Rotation>,
-        entity: Entity,
-        context: &<Self::Context as SystemParam>::Item<'_, '_>,
     ) -> ColliderAabb {
-        self.aabb(start_position, start_rotation, entity, context)
-            .merged(self.aabb(end_position, end_rotation, entity, context))
+        self.aabb(start_position, start_rotation)
+            .merged(self.aabb(end_position, end_rotation))
     }
 
     /// Computes the collider's mass properties based on its shape and a given density.
@@ -159,8 +149,8 @@ pub trait AnyCollider: Component {
         rotation2: impl Into<Rotation>,
         entity1: Entity,
         entity2: Entity,
-        context: &<Self::Context as SystemParam>::Item<'_, '_>,
         prediction_distance: Scalar,
+        context: &SystemParamItem<'_, '_, Self::Context>,
     ) -> Vec<ContactManifold>;
 }
 
